@@ -11,6 +11,7 @@ class _SecondPageState extends State<SecondPage> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   late final SharedPreferences sharedPreferences;
   late String text = '';
+  late int currentTheme;
 
   Future<void> loadPrefs() async {
     sharedPreferences = await _prefs;
@@ -21,8 +22,11 @@ class _SecondPageState extends State<SecondPage> {
     loadPrefs();
 
     var data = ModalRoute.of(context)!.settings.arguments;
+    Map<String, dynamic> values = data as Map<String, dynamic>;
+
     if (data != null) {
-      text = data.toString();
+      text = data['TEXT'];
+      currentTheme = data['THEME'] as int;
     }
 
     return Scaffold(
@@ -40,6 +44,7 @@ class _SecondPageState extends State<SecondPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              /*
               ElevatedButton(
                   onPressed: () {
                     if (sharedPreferences.getString('TEXT') == null) {
@@ -50,28 +55,49 @@ class _SecondPageState extends State<SecondPage> {
                   child: Text('Назад')),
               SizedBox(
                 width: 10,
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    sharedPreferences.setString('TEXT', text);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Данные успешно сохранены'),
-                      ),
-                    );
-                  },
-                  child: Text('Сохранить')),
+              ),*/
+              SizedBox(
+                width: 300,
+                height: 35,
+                child: ElevatedButton(
+                    onPressed: () {
+                      sharedPreferences.setString('TEXT', text);
+                      sharedPreferences.setInt('THEME', currentTheme);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Данные успешно сохранены'),
+                        ),
+                      );
+                    },
+                    child: Text('Сохранить')),
+              )
             ],
           ),
           SizedBox(
             height: 15,
           ),
-          ElevatedButton(
-              onPressed: () {
-                sharedPreferences.remove('TEXT');
-                Navigator.pushNamed(context, 'first_page');
-              },
-              child: Text('Очистить данные'))
+          SizedBox(
+            width: 300,
+            height: 35,
+            child: ElevatedButton(
+                onPressed: () {
+                  if (sharedPreferences.getString('TEXT') != null &&
+                      sharedPreferences.getInt('THEME') != null) {
+                    sharedPreferences.remove('TEXT');
+                    sharedPreferences.remove('THEME');
+
+                    Navigator.pushNamed(context, 'first_page');
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Нет данных для удаления'),
+                      ),
+                    );
+                  }
+                },
+                child: Text('Очистить данные')),
+          ),
         ],
       )),
     );
